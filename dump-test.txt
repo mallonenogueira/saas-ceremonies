@@ -1,0 +1,12 @@
+pg_dump -U mallone -Fc saas-client > /tmp/db.dump
+
+createdb -U mallone -w newdb
+
+pg_restore -U mallone -d newdb /tmp/db.dump
+
+
+Retorna os dados sem dar erro pois não refaz a estrutura do banco pelo que entendi
+pg_restore -U mallone -d saas-client --clean  /tmp/db.dump
+
+Da erro pois tenta recriar o banco de dados (a documentação pede para usar os dois porém da erro)
+pg_restore -U mallone -d saas-client --clean --create /tmp/db2.dump

@@ -1,0 +1,78 @@
+
+@url = http://localhost:3000
+
+### Criar nova conta
+POST {{url}}/account HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Empresa Company",
+    "email": "mycompany1@gmail.com",
+    "user": {
+        "name": "Usuario Company",
+        "email": "mycompany1@gmail.com",
+        "password": "123456789"
+    }
+}
+
+### Realizar login
+# @name login
+POST {{url}}/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "mycompany1@gmail.com",
+    "password": "123456789"
+}
+
+
+### Pegar usuários
+@size = 10
+@page = 0
+
+GET {{url}}/users?page={{page}}&size={{size}} HTTP/1.1
+content-type: application/json
+Authorization: {{login.response.body.token}}
+
+### Pegar usuário
+# @name getUser
+@id = a
+
+GET {{url}}/users?id={{id}} HTTP/1.1
+content-type: application/json
+Authorization: {{login.response.body.token}}
+
+
+### Criar novo usuário
+POST {{url}}/users HTTP/1.1
+content-type: application/json
+Authorization: {{login.response.body.token}}
+
+{
+    "name": "Empresa asdasd",
+    "email": "sada3423123423asdasd4@gmail.com",
+    "password": "123456789"
+}
+
+
+###  Editar novo usuário
+PUT {{url}}/users/6 HTTP/1.1
+content-type: application/json
+Authorization: {{login.response.body.token}}
+
+{
+    "name": "Usuario Company",
+    "email": "mycompany@gmail.com"
+}
+
+    # "password": "1234abc"
+# {
+#     "id": 2,
+#     "email": "sada12342@gmail.com",
+#     "name": "Empresa",
+#     "img": null,
+#     "accountId": 1,
+#     "role": 2,
+#     "createdAt": "2024-07-02T21:01:11.333Z",
+#     "updatedAt": "2024-07-02T21:01:11.333Z"
+# },

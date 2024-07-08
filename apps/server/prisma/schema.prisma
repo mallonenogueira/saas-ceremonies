@@ -1,0 +1,105 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id    String  @id @default(uuid())
+  email String  @unique
+  name  String
+  logo  String?
+
+  users   User[]
+  Session Session[]
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  Ceremony  Ceremony[]
+
+  @@map("accounts")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  img       String?
+  account   Account  @relation(fields: [accountId], references: [id])
+  accountId String
+  // role      Role    @default(USER)
+  role      Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  //   ADMIN 1
+  //   USER 2
+  Session Session[]
+
+  @@map("users")
+}
+
+model Ceremony {
+  id        String    @id @default(uuid())
+  publicId  Int       @unique @default(autoincrement())
+  start     DateTime?
+  end       DateTime?
+  published Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  peopleName      String    @map("people_name")
+  peopleImage     String?   @map("people_image")
+  peopleHistory   String?   @map("people_history")
+  peopleBirthDate DateTime? @map("people_birth_date")
+  peopleDeathDate DateTime? @map("people_death_date")
+
+  accountId         String
+  addressId         Int?
+  addressCemeteryId Int?
+  account           Account  @relation(fields: [accountId], references: [id])
+  addressCeremony   Address? @relation(name: "address_ceremony", fields: [addressId], references: [id])
+  addressCemetery   Address? @relation(name: "address_cemetery", fields: [addressCemeteryId], references: [id])
+
+  @@map("ceremonies")
+}
+
+model Address {
+  id               Int        @id @default(autoincrement())
+  name             String
+  address          String
+  city             String
+  state            String
+  complement       String
+  Ceremony         Ceremony[] @relation("address_ceremony")
+  CeremonyCemetery Ceremony[] @relation("address_cemetery")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("addresses")
+}
+
+model Session {
+  id        String  @id @default(uuid())
+  userId    String
+  accountId String
+  user      User    @relation(fields: [userId], references: [id])
+  account   Account @relation(fields: [accountId], references: [id])
+  disabled  Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("sessions")
+}
+
+// enum Role {
+//   USER
+//   ADMIN
+// }

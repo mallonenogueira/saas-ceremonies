@@ -30,7 +30,7 @@ resource "aws_route_table" "second_rt" {
 }
 
 resource "aws_eip" "nat" {
-  domain   = "vpc"
+  domain = "vpc"
 }
 
 resource "aws_nat_gateway" "main" {
@@ -163,7 +163,8 @@ resource "aws_instance" "db" {
   vpc_security_group_ids      = [aws_security_group.db_security_group.id]
 
   user_data = templatefile("/home/mallone/projects/saas-ceremonies/install_postgress.sh", {
-    pg_hba_file = templatefile("/home/mallone/projects/saas-ceremonies/pg_hba.conf", { allowed_ip = "0.0.0.0/0" }),
+    pg_hba_file     = templatefile("/home/mallone/projects/saas-ceremonies/pg_hba.conf", { allowed_ip = "0.0.0.0/0" }),
+    postgresql_file = templatefile("/home/mallone/projects/saas-ceremonies/postgresql.conf", { allowed_ip = "*" }),
   })
 
   tags = {
@@ -177,9 +178,13 @@ resource "aws_instance" "backend" {
   instance_type = var.instance_type
   key_name      = aws_key_pair.ssh_key.key_name
 
+  iam_instance_profile = aws_iam_instance_profile.iam_instance_profile.name
+
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.backend_security_groug.id]
+
+  user_data = templatefile("/home/mallone/projects/saas-ceremonies/install_backend.sh", {})
 
   tags = {
     Name = "Saas - BackendInstance"
@@ -189,4 +194,55 @@ resource "aws_instance" "backend" {
 resource "aws_key_pair" "ssh_key" {
   key_name   = "my-ssh-key"
   public_key = file("../my-key-gen.pub")
+}
+
+resource "aws_iam_role" "role" {
+  name = "test-role"
+
+  assume_role_policy = <<EOF
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": "sts:AssumeRole",
+          "Principal": {
+            "Service": "ec2.amazonaws.com"
+          },
+          "Effect": "Allow",
+          "Sid": ""
+        }
+      ]
+    }
+EOF
+}
+
+resource "aws_iam_policy" "policy" {
+  name        = "test-policy"
+  description = "A test policy"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ecr:*",
+        "cloudtrail:LookupEvents"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "test-attach" {
+  role       = aws_iam_role.role.name
+  policy_arn = aws_iam_policy.policy.arn
+}
+
+resource "aws_iam_instance_profile" "iam_instance_profile" {
+  name = "saas-ec2-profile"
+  role = aws_iam_role.role.name
 }

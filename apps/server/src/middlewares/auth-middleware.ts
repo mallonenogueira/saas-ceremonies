@@ -12,7 +12,7 @@ export function authMiddleware(
   const token = req.headers.authorization;
 
   if (!token) {
-    res.status(401).json({ message: "Unauthorized" });
+    res.status(401).json({ message: "Unauthorized v2" });
     return;
   }
 

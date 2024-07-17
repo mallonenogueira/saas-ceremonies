@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "export DATABASE_URL=postgres://postgres@${database_ip}:5432/saas-client" >> /etc/environment
+
 sudo dnf update
 sudo dnf install -y docker amazon-ecr-credential-helper
 

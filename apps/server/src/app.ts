@@ -1,10 +1,16 @@
 import express from "express";
 import { router } from "./route";
 import helmet from "helmet";
+import cors from "cors";
 import { loggerMiddleware } from "./middlewares/logger-middleware";
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(helmet());
 app.use(express.json());
 app.use(loggerMiddleware);

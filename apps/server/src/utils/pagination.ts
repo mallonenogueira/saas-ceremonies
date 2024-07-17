@@ -16,5 +16,13 @@ export const Pagination = z.object({
 });
 
 export function getPagination(res: Response) {
-  return res.locals.pagination as z.infer<typeof Pagination>;
+  const pagination = res.locals.pagination as z.infer<typeof Pagination>;
+  
+  return {
+    ...pagination,
+    prisma: {
+      skip: pagination.page * pagination.size,
+      take: pagination.size,
+    },
+  };
 }

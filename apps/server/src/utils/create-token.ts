@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { JWT_SECRET } from "../config/env";
 
-const secret = process.env.JWT_SECRET_KEY || "dev_secret";
 
 export const TokenPayloadSchema = z.object({
     sessionId: z.string(),
@@ -21,6 +21,6 @@ export function createToken(payload: SessionUser) {
 
   return {
     payload: data,
-    token: jwt.sign(data, secret),
+    token: jwt.sign(data, JWT_SECRET),
   };
 }

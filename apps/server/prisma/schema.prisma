@@ -20,6 +20,7 @@ model Account {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
   Ceremony  Ceremony[]
+  Address   Address[]
 
   @@map("accounts")
 }
@@ -75,7 +76,9 @@ model Address {
   address          String
   city             String
   state            String
-  complement       String
+  complement       String?
+  accountId        String
+  account          Account    @relation(fields: [accountId], references: [id])
   Ceremony         Ceremony[] @relation("address_ceremony")
   CeremonyCemetery Ceremony[] @relation("address_cemetery")
 

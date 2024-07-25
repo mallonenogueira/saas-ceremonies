@@ -5,7 +5,7 @@ import { prisma } from "../../config/prisma";
 import { getSessionUser } from "../../utils/get-session-user";
 import { getPagination } from "../../utils/pagination";
 
-const FilterSchema = z.object({ id: z.number().positive().optional() });
+const FilterSchema = z.object({ id: z.coerce.number().positive().optional() });
 
 export async function getAddress(req: Request, res: Response) {
   const { accountId } = getSessionUser(res);

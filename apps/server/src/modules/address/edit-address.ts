@@ -5,7 +5,7 @@ import { prisma } from "../../config/prisma";
 import { EditAddressSchema } from "./schemas";
 import { getSessionUser } from "../../utils/get-session-user";
 
-const IdSchema = z.object({ id: z.number().positive() });
+const IdSchema = z.object({ id: z.coerce.number().positive() });
 
 export async function editAddress(req: Request, res: Response) {
   const { accountId } = getSessionUser(res);

@@ -32,26 +32,28 @@ content-type: application/json
 
 GET {{url}}/address?page={{page}}&size={{size}} HTTP/1.1
 content-type: application/json
-Authorization: {{login.response.body.token}}
+Authorization: Bearer {{login.response.body.token}}
 
 ### Pegar usuário
 # @name getUser
-@id = a
+@id = 1
 
-GET {{url}}/users?id={{id}} HTTP/1.1
+GET {{url}}/address?id={{id}} HTTP/1.1
 content-type: application/json
-Authorization: {{login.response.body.token}}
+Authorization: Bearer {{login.response.body.token}}
 
 
 ### Criar novo usuário
-POST {{url}}/users HTTP/1.1
+POST {{url}}/address HTTP/1.1
 content-type: application/json
-Authorization: {{login.response.body.token}}
+Authorization: Bearer {{login.response.body.token}}
 
 {
-    "name": "Empresa asdasd",
-    "email": "sada3423123423asdasd4@gmail.com",
-    "password": "123456789"
+    "name": "Endereço 1",
+    "address": "Rua 1, Numero 123",
+    "city": "Araraquara",
+    "state": "São Paulo",
+    "complement": "ccomplemento aqui da rua"
 }
 
 

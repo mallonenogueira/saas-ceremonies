@@ -5,6 +5,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
+  InputProps,
 } from "@chakra-ui/react";
 
 export function ControllerInput<T extends FieldValues>({
@@ -12,12 +13,15 @@ export function ControllerInput<T extends FieldValues>({
   label,
   control,
   rules,
+  ...inputProps
 }: {
   name: Path<T>;
   label?: string;
   control: Control<T>;
   rules?: Rules<T>;
-}) {
+} & InputProps) {
+  const id = inputProps.id || name;
+
   return (
     <Controller
       name={name}
@@ -25,10 +29,10 @@ export function ControllerInput<T extends FieldValues>({
       rules={rules}
       render={({ field, fieldState }) => (
         <FormControl isInvalid={!!fieldState.error}>
-          {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
+          {label && <FormLabel htmlFor={id}>{label}</FormLabel>}
 
-          <Input id={name} {...field} />
-
+          <Input id={id} {...inputProps} {...field} />
+          
           <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
         </FormControl>
       )}

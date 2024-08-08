@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { SessionUser } from "../utils/create-token";
 import { JWT_SECRET } from "../config/env";
+import { MessageError } from "../errors/validation-error";
 
 export function authMiddleware(
   req: Request,
@@ -11,7 +12,7 @@ export function authMiddleware(
   const token = req.headers.authorization;
 
   if (!token || !token.startsWith("Bearer ")) {
-    res.status(401).json({ message: "Unauthorized" });
+    res.status(401).json(new MessageError("Não autorizado"));
     return;
   }
 

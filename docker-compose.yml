@@ -1,14 +1,14 @@
 version: '3.1'
 
 services:
-  backend:
-      build: ./apps/server
-      ports:
-        - "3000:3000"
-      depends_on:
-        - database
-      environment:
-        DATABASE_URL: postgres://mallone:root@database:5432/saas-client
+  # backend:
+  #     build: ./apps/server
+  #     ports:
+  #       - "3000:3000"
+  #     depends_on:
+  #       - database
+  #     environment:
+  #       DATABASE_URL: postgres://mallone:root@database:5432/saas-client
 
   database:
     image: postgres
@@ -17,3 +17,28 @@ services:
     environment:
       POSTGRES_USER: mallone
       POSTGRES_PASSWORD: root
+      
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "8081:16686"  # Jaeger UI
+      - "14268"
+      - "14250"
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # http gRPC receiver
+      - "55679:55679" # zpages extension
+    depends_on:
+      - jaeger
+    links:
+      - jaeger

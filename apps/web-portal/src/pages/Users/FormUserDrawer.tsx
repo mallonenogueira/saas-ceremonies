@@ -12,40 +12,46 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { Address } from "../../models/address";
 import { SchemaRules } from "../../types/validation-form";
 import { ControllerInput } from "../../components/ControllerInput";
+import { User } from "../../models/user";
 import { useEffect } from "react";
 
-const validations: SchemaRules<Address> = {
+const EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+const validations: SchemaRules<User> = {
   name: {
     required: "Nome obrigatório",
   },
-  address: {
-    required: "Endereço obrigatório",
+  email: {
+    pattern: {
+      value: EMAIL_PATTERN,
+      message: "Email inválido",
+    },
+    required: "Email obrigatório",
   },
-  city: {
-    required: "Cidade obrigatória",
-  },
-  state: {
-    required: "Estado obrigatório",
+  password: {
+    required: "Senha obrigatória",
   },
 };
 
-export function FormAddressDrawer({
+export function FormUserDrawer({
   title,
   onClose,
   isOpen,
   onSubmit,
   initialValues,
+  isRequiredPassword,
 }: {
   title: string;
-  initialValues?: Address;
+  initialValues?: Partial<User>;
   isOpen: boolean;
+  isRequiredPassword?: boolean;
   onClose: () => void;
-  onSubmit: (values: Address) => Promise<void>;
+  onSubmit: (values: User) => Promise<void>;
 }) {
-  const { control, handleSubmit, formState, reset } = useForm<Address>();
+  const { control, handleSubmit, formState, reset } = useForm<User>({
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +60,12 @@ export function FormAddressDrawer({
   }, [initialValues, isOpen, reset]);
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} size="md">
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      onCloseComplete={() => reset({})}
+    >
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
@@ -64,7 +75,7 @@ export function FormAddressDrawer({
         </DrawerHeader>
 
         <DrawerBody>
-          <form id="address-form" onSubmit={handleSubmit(onSubmit)}>
+          <form id="user-form" onSubmit={handleSubmit(onSubmit)}>
             <Stack>
               <ControllerInput
                 control={control}
@@ -75,30 +86,16 @@ export function FormAddressDrawer({
 
               <ControllerInput
                 control={control}
-                name="address"
-                label="Endereço"
-                rules={validations.address}
+                name="email"
+                label="Email"
+                rules={validations.email}
               />
 
               <ControllerInput
                 control={control}
-                name="complement"
-                label="Complemento"
-                rules={validations.complement}
-              />
-
-              <ControllerInput
-                control={control}
-                name="state"
-                label="Estado"
-                rules={validations.state}
-              />
-
-              <ControllerInput
-                control={control}
-                name="city"
-                label="Cidade"
-                rules={validations.city}
+                name="password"
+                label="Nova senha"
+                rules={isRequiredPassword ? validations.password : undefined}
               />
             </Stack>
           </form>
@@ -114,7 +111,7 @@ export function FormAddressDrawer({
 
             <Button
               type="submit"
-              form="address-form"
+              form="user-form"
               isLoading={formState.isSubmitting}
             >
               Salvar

@@ -12,7 +12,9 @@ import { NavLink } from "react-router-dom";
 export function PageContainer({
   action,
   children,
+  currentPage
 }: {
+  currentPage: string;
   action?: ReactNode;
   children?: ReactNode;
 }) {
@@ -30,7 +32,7 @@ export function PageContainer({
           </BreadcrumbItem>
 
           <BreadcrumbItem isCurrentPage>
-            <BreadcrumbLink>Endereços</BreadcrumbLink>
+            <BreadcrumbLink>{currentPage}</BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
 

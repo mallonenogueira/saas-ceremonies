@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 
-import { prisma } from "../../config/prisma";
 import { getSessionUser } from "../../utils/get-session-user";
 import { getPagination } from "../../utils/pagination";
+import { getUsersService } from "./services/get-users";
 
 const FilterSchema = z.object({ id: z.string().uuid().optional() });
 
@@ -16,14 +16,11 @@ export async function getUsers(req: Request, res: Response) {
     return res.status(400).json({ errors: filters.error.errors });
   }
 
-  const [total, data] = await prisma.$transaction([
-    prisma.user.count({ where: { accountId, ...filters.data } }),
-    prisma.user.findMany({
-      skip: pagination.page * pagination.size,
-      take: pagination.size,
-      where: { accountId, ...filters.data },
-    }),
-  ]);
+  const { total, data } = await getUsersService(
+    accountId,
+    filters.data,
+    pagination.prisma
+  );
 
   res.send({ pagination: { ...pagination, total }, data });
 }

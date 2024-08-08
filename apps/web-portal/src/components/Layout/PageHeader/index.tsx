@@ -1,6 +1,8 @@
 import { Box } from "@chakra-ui/react";
+import { useAuth } from "../../../contexts/auth";
 
 export function PageHeader() {
+  const { user } = useAuth();
   return (
     <Box
       as="header"
@@ -14,6 +16,8 @@ export function PageHeader() {
       p="4"
       display="flex"
       alignItems="center"
-    ></Box>
+    >
+      <b>Usuário: </b> {user?.name}
+    </Box>
   );
 }

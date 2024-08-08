@@ -3,6 +3,7 @@ import { router } from "./route";
 import helmet from "helmet";
 import cors from "cors";
 import { loggerMiddleware } from "./middlewares/logger-middleware";
+import { MessageError } from "./errors/validation-error";
 
 const app = express();
 
@@ -18,9 +19,7 @@ app.use(router);
 
 app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    res.status(404).send({
-      message: "Not found",
-    });
+    res.status(404).send(new MessageError("Não encontrado"));
   }
 );
 

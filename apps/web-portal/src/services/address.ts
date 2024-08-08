@@ -1,27 +1,20 @@
 import useSWR from "swr";
 import { Address } from "../models/address";
 import { fetcher } from "./api";
-
-interface OrderBy {
-  field: string;
-  order: "asc" | "desc";
-}
+import { SortingState } from "@tanstack/react-table";
+import { Pagination } from "../models/pagination";
 
 interface RequestData {
   data: Address[];
-  pagination: {
-    page: number;
-    size: number;
-    total: number;
-  };
+  pagination: Pagination;
 }
 
-export const useAddress = (page = 0, order?: OrderBy) => {
+export const useAddress = (page = 0, order?: SortingState) => {
   let orderText = '';
 
-  if (order) {
-    orderText += `&orderBy=${order.field}`;
-    orderText += `&orderDi=${order.order}`;
+  if (order?.length) {
+    orderText += `&orderBy=${order[0].id}`;
+    orderText += `&orderDi=${order[0].desc ? 'asc' : 'desc'}`;
   }
 
   return useSWR<RequestData>(`/address?page=${page}${orderText}`, fetcher);

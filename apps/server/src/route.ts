@@ -11,6 +11,9 @@ import { editUser } from "./modules/users/edit-user";
 import { getAddress } from "./modules/address/get-address";
 import { createAddress } from "./modules/address/create-address";
 import { editAddress } from "./modules/address/edit-address";
+import { getCeremonies } from "./modules/ceremonies/get-ceremonies";
+import { createCeremony } from "./modules/ceremonies/create-ceremony";
+import { editCeremony } from "./modules/ceremonies/edit-ceremony";
 
 const router = Router();
 
@@ -36,5 +39,23 @@ router.get(
 );
 router.post("/address", roleMiddleware([roleMiddleware.ADMIN]), createAddress);
 router.put("/address/:id", roleMiddleware([roleMiddleware.ADMIN]), editAddress);
+
+router.get(
+  "/ceremonies",
+  roleMiddleware([roleMiddleware.ADMIN, roleMiddleware.USER]),
+  paginationMiddleware,
+  getCeremonies
+);
+router.post(
+  "/ceremonies",
+  roleMiddleware([roleMiddleware.ADMIN, roleMiddleware.USER]),
+  createCeremony
+);
+
+router.put(
+  "/ceremonies/:id",
+  roleMiddleware([roleMiddleware.ADMIN, roleMiddleware.USER]),
+  editCeremony
+);
 
 export { router };

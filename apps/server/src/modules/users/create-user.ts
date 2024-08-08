@@ -1,10 +1,8 @@
-import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
-
-import { prisma } from "../../config/prisma";
 import { UserSchema } from "./schemas";
-import { hashPassword } from "../../utils/password";
 import { getSessionUser } from "../../utils/get-session-user";
+import { MessageError } from "../../errors/validation-error";
+import { createUserUseCase } from "./services/create-user-use-case";
 
 export async function createUser(req: Request, res: Response) {
   const { accountId } = getSessionUser(res);
@@ -15,47 +13,19 @@ export async function createUser(req: Request, res: Response) {
   }
 
   try {
-    const checkEmail = await prisma.user.findUnique({
-      where: {
-        email: data.email,
-      },
-    });
-
-    if (checkEmail) {
-      return res.status(400).json({
-        errors: [
-          {
-            message: "Email já está em uso",
-          },
-        ],
-      });
-    }
-
-    const result = await prisma.user.create({
-      data: {
-        ...data,
-        accountId,
-        password: hashPassword(data.password),
-        role: 2,
-      },
+    const result = await createUserUseCase({
+      ...data,
+      accountId,
     });
 
     res.json({ data: result });
   } catch (error) {
     console.log(error);
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        console.log("There is a unique constraint violation");
-      }
+    if (error instanceof MessageError) {
+      return res.status(400).json(error);
     }
 
-    res.status(400).json({
-      errors: [
-        {
-          message: "Erro ao cadastrar novo usuário",
-        },
-      ],
-    });
+    res.status(400).json(new MessageError("Erro ao cadastrar novo usuário"));
   }
 }

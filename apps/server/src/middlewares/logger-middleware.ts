@@ -18,6 +18,8 @@ export function loggerMiddleware(
 
   res.locals.logger = loggerChild;
 
+  if (true) return next();
+
   (
     logAudit({
       logger: loggerChild,

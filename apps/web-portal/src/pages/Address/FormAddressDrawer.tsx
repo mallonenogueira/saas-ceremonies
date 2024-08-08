@@ -9,59 +9,24 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
   Stack,
   useToast,
 } from "@chakra-ui/react";
-import {
-  Control,
-  Controller,
-  FieldValues,
-  Path,
-  RegisterOptions,
-  useForm,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Address } from "../../models/address";
-import { api } from "../../services/api";
+import { SchemaRules } from "../../types/validation-form";
+import { ControllerInput } from "../../components/ControllerInput";
+import { useEffect } from "react";
+import useSWR from "swr";
 
-type Rules<T extends FieldValues = FieldValues> = Omit<
-  RegisterOptions<T>,
-  "valueAsNumber" | "valueAsDate" | "setValueAs" | "disabled"
->;
-type SchemaRules<T extends FieldValues> = Partial<Record<Path<T>, Rules<T>>>;
-
-function ControllerInput<T extends FieldValues>({
-  name,
-  label,
-  control,
-  rules,
-}: {
-  name: Path<T>;
-  label?: string;
-  control: Control<T>;
-  rules?: Rules<T>;
-}) {
-  return (
-    <Controller
-      name={name}
-      control={control}
-      rules={rules}
-      render={({ field, fieldState }) => (
-        <FormControl isInvalid={!!fieldState.error}>
-          {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
-
-          <Input id={name} {...field} />
-
-          <FormErrorMessage>{fieldState.error?.message}</FormErrorMessage>
-        </FormControl>
-      )}
-    />
-  );
-}
 const validations: SchemaRules<Address> = {
+  zipCode: {
+    required: "Cep obrigatório",
+    min: {
+      value: 8,
+      message: "Cep inválido",
+    },
+  },
   name: {
     required: "Nome obrigatório",
   },
@@ -76,46 +41,93 @@ const validations: SchemaRules<Address> = {
   },
 };
 
-export function FormAddressDrawer({
-  onClose,
-  isOpen,
-  onSuccess,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
-  const { control, handleSubmit, formState, reset } = useForm<Address>();
+interface AddressZipCode {
+  cep: string;
+  state: string;
+  city: string;
+  neighborhood: string;
+  street: string;
+}
+
+function useZipCode(zipCode: string) {
   const toast = useToast();
 
-  async function onSubmit(values: Address) {
-    await api.post("/address", values);
+  return useSWR<AddressZipCode>(
+    (zipCode || "").length === 8 &&
+      `https://brasilapi.com.br/api/cep/v2/${zipCode}`,
+    {
+      fetcher: (url: string) => fetch(url).then((r) => r.json()),
+      onError: () => {
+        toast({
+          title: "Erro ao buscar dados do endereço.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      },
+    }
+  );
+}
 
-    onSuccess();
-    setTimeout(reset, 1000);
-
-    toast({
-      title: "Endereço cadastro com sucesso.",
-      // description: "We've created your account for you.",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
+export function FormAddressDrawer({
+  title,
+  onClose,
+  isOpen,
+  onSubmit,
+  initialValues,
+}: {
+  title: string;
+  initialValues?: Address;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (values: Address) => Promise<void>;
+}) {
+  const { control, handleSubmit, formState, reset, setValue, watch } =
+    useForm<Address>({
+      defaultValues: initialValues,
     });
-  }
+
+  const { data } = useZipCode(watch("zipCode"));
+
+  useEffect(() => {
+    if (data) {
+      setValue("city", data.city);
+      setValue("address", data.street + " - " + data.neighborhood);
+      setValue("state", data.state);
+    }
+  }, [data, setValue]);
+
+  useEffect(() => {
+    if (isOpen) reset(initialValues);
+  }, [initialValues, isOpen, reset]);
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      onCloseComplete={() => reset({})}
+    >
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerHeader>
-          Novo endereço
+          {title}
           <Divider my="2" />
         </DrawerHeader>
 
         <DrawerBody>
           <form id="address-form" onSubmit={handleSubmit(onSubmit)}>
             <Stack>
+              <ControllerInput
+                control={control}
+                name="zipCode"
+                label="Cep"
+                minLength={8}
+                maxLength={8}
+                rules={validations.zipCode}
+              />
+
               <ControllerInput
                 control={control}
                 name="name"

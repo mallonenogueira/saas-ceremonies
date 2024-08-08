@@ -78,7 +78,9 @@ export function Layout() {
         />
         <Stack as="nav" spacing={2}>
           <CustomLink to="/" text="Home" />
+          <CustomLink to="/users" text="Usuários" />
           <CustomLink to="/address" text="Endereços" />
+          <CustomLink to="/ceremonies" text="Cerimônias" />
         </Stack>
 
         <Box mt="auto" mx="3" mb="3">

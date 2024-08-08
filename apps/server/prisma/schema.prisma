@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["omitApi"]
+  previewFeatures = ["omitApi", "tracing"]
 }
 
 datasource db {
@@ -46,13 +46,14 @@ model User {
 }
 
 model Ceremony {
-  id        String    @id @default(uuid())
-  publicId  Int       @unique @default(autoincrement())
-  start     DateTime?
-  end       DateTime?
-  published Boolean   @default(false)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  id          String    @id @default(uuid())
+  publicId    Int       @unique @default(autoincrement())
+  start       DateTime?
+  end         DateTime?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  description String?
 
   peopleName      String    @map("people_name")
   peopleImage     String?   @map("people_image")
@@ -72,6 +73,7 @@ model Ceremony {
 
 model Address {
   id               Int        @id @default(autoincrement())
+  zipCode          String     @map("zip_code")
   name             String
   address          String
   city             String
